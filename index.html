@@ -24,6 +24,16 @@
         <p id="filenameDisplay" class="filename-val">未撮影</p>
       </div>
 
+      <!-- 画質調整スライダー -->
+      <div class="quality-control" style="margin: 15px 0; padding: 0 10px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #ccc; font-size: 14px;">
+          <span>最高画質</span>
+          <span id="qualityVal">4096px / Q:0.95</span>
+          <span>軽量</span>
+        </div>
+        <input type="range" id="qualitySlider" min="0" max="100" value="0" style="width: 100%;">
+      </div>
+
       <!-- 隠しinput（カメラ起動用） -->
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
 
