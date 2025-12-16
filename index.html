@@ -18,14 +18,26 @@
       <div class="preview-container">
         <canvas id="previewCanvas" width="600" height="600"></canvas>
       </div>
+
       <div class="info-area">
         <p class="filename-label">保存ファイル名:</p>
-        <p id="filenameDisplay" class="filename-val">Loading...</p>
+        <p id="filenameDisplay" class="filename-val">未撮影</p>
       </div>
-      <button id="shareBtn" class="primary-btn">
-        <span class="btn-text">画像を共有・保存</span>
-        <span class="btn-sub">ファイルへ保存を選択してください</span>
-      </button>
+
+      <!-- 隠しinput（カメラ起動用） -->
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
+      <div class="btn-group">
+        <button id="cameraBtn" class="primary-btn action-btn">
+          <span class="btn-text">📷 撮影する</span>
+        </button>
+
+        <button id="shareBtn" class="primary-btn share-btn" disabled>
+          <span class="btn-text">画像を保存・共有</span>
+          <span class="btn-sub">ファイルへ保存を選択</span>
+        </button>
+      </div>
+
     </div>
   </div>
   <script type="module" src="/src/main.js"></script>
