@@ -9,13 +9,12 @@ debugArea.style.cssText = `
     bottom: 0;
     left: 0;
     right: 0;
-    height: 120px;
+    height: auto;
     background: rgba(0, 0, 0, 0.8);
     color: #0f0;
     font-family: monospace;
     font-size: 11px;
     z-index: 10000;
-    overflow-y: scroll;
     padding: 8px;
     pointer-events: none; /* 下の要素をクリックできるように */
     border-top: 1px solid #333;
@@ -31,6 +30,12 @@ const log = (msg) => {
 
     // 最新を上に
     debugArea.prepend(p);
+
+    // 3行以上になったら古いものを消す
+    while (debugArea.children.length > 3) {
+        debugArea.removeChild(debugArea.lastChild);
+    }
+
     console.log(msg);
 };
 
