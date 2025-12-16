@@ -192,25 +192,39 @@ cameraInput.addEventListener('change', (e) => {
     ctx.fillStyle = '#fff';
     ctx.fillText('Processing...', canvas.width / 2, canvas.height / 2);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        log('FileReader loaded');
+    // ★修正: FileReader(Base64)をやめて createObjectURL を使う
+    // これによりメモリ消費が劇的に減り、iPhoneでも落ちにくくなる
+    try {
+        log('Creating ObjectURL...');
+        const url = URL.createObjectURL(file);
+
         const img = new Image();
         img.onload = () => {
-            log(`Image loaded: ${img.width}x${img.height}`);
+            log(`Image loaded via ObjectURL: ${img.width}x${img.height}`);
 
             // Global変数に保持
             originalImage = img;
 
-            // 初回変換（スライダー値に基づいて）
+            // 初回変換
             updatePreview();
 
-            log('Initial preview updated');
+            // メモリ解放（描画してしまったのでURLはもう不要）
+            URL.revokeObjectURL(url);
+            log('ObjectURL revoked');
         };
-        img.onerror = (err) => log('Image load error');
-        img.src = event.target.result;
-    };
-    reader.onerror = (err) => log('FileReader error: ' + err);
+
+        img.onerror = (e) => {
+            log('Image load error (ObjectURL)');
+            alert('画像の読み込みに失敗しました');
+            drawPlaceholder();
+        };
+
+        img.src = url;
+
+    } catch (err) {
+        log('Error setting up image: ' + err.message);
+        drawPlaceholder();
+    }
 });
 
 // 共有・保存ボタン
