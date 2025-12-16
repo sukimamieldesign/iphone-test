@@ -65,63 +65,77 @@ const getFileName = () => {
 
 // 画質・サイズ計算と反映
 const updatePreview = () => {
-    if (!originalImage) return;
+    try {
+        if (!originalImage) return;
 
-    // スライダー値 (0:最高 - 100:軽量)
-    // 左端(0)   -> Max: 4096, Q: 0.95
-    // 右端(100) -> Max: 2048, Q: 0.80
+        log('updatePreview started');
 
-    const val = parseInt(qualitySlider.value, 10);
-    const ratio = val / 100; // 0.0 - 1.0
+        // スライダー値 (0:最高 - 100:軽量)
+        // 左端(0)   -> Max: 4096, Q: 0.95
+        // 右端(100) -> Max: 2048, Q: 0.80
 
-    const targetMaxSize = 4096 - ((4096 - 2048) * ratio); // 4096 -> 2048
-    const targetQuality = 0.95 - ((0.95 - 0.80) * ratio); // 0.95 -> 0.80
+        const val = parseInt(qualitySlider.value, 10);
+        const ratio = val / 100; // 0.0 - 1.0
 
-    // Canvasサイズ計算
-    let width = originalImage.width;
-    let height = originalImage.height;
+        const targetMaxSize = 4096 - ((4096 - 2048) * ratio);
+        const targetQuality = 0.95 - ((0.95 - 0.80) * ratio);
 
-    if (width > height) {
-        if (width > targetMaxSize) {
-            height *= targetMaxSize / width;
-            width = targetMaxSize;
-        }
-    } else {
-        if (height > targetMaxSize) {
-            width *= targetMaxSize / height;
-            height = targetMaxSize;
-        }
-    }
-    width = Math.floor(width);
-    height = Math.floor(height);
+        // Canvasサイズ計算
+        let width = originalImage.width;
+        let height = originalImage.height;
 
-    canvas.width = width;
-    canvas.height = height;
-
-    // 描画
-    ctx.drawImage(originalImage, 0, 0, width, height);
-
-    // Blob化
-    canvas.toBlob((blob) => {
-        if (blob) {
-            currentBlob = blob;
-            // 既にファイル名があれば維持、なければ生成（初回）
-            if (!currentFileName) currentFileName = getFileName();
-
-            filenameDisplay.textContent = currentFileName;
-            shareBtn.disabled = false;
-
-            const mb = (blob.size / 1024 / 1024).toFixed(2);
-            shareBtn.querySelector('.btn-sub').textContent = `JPEG画像 (${mb} MB)`;
-
-            // ラベル更新
-            qualityVal.textContent = `${Math.max(width, height)}px / Q:${targetQuality.toFixed(2)}`;
-
+        if (width > height) {
+            if (width > targetMaxSize) {
+                height *= targetMaxSize / width;
+                width = targetMaxSize;
+            }
         } else {
-            log('Blob conversion failed');
-            alert('画像の変換に失敗しました');
+            if (height > targetMaxSize) {
+                width *= targetMaxSize / height;
+                height = targetMaxSize;
+            }
         }
-    }, 'image/jpeg', targetQuality);
+        width = Math.floor(width);
+        height = Math.floor(height);
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // 描画
+        log(`Drawing canvas: ${width}x${height}`);
+        ctx.drawImage(originalImage, 0, 0, width, height);
+
+        // Blob化
+        log('Starting toBlob...');
+        canvas.toBlob((blob) => {
+            log('toBlob callback received');
+            if (blob) {
+                currentBlob = blob;
+                // 既にファイル名があれば維持、なければ生成（初回）
+                if (!currentFileName) currentFileName = getFileName();
+
+                filenameDisplay.textContent = currentFileName;
+                shareBtn.disabled = false;
+
+                const mb = (blob.size / 1024 / 1024).toFixed(2);
+                shareBtn.querySelector('.btn-sub').textContent = `JPEG画像 (${mb} MB)`;
+
+                // ラベル更新
+                qualityVal.textContent = `${Math.max(width, height)}px / Q:${targetQuality.toFixed(2)}`;
+                log('Preview updated successfully');
+
+            } else {
+                log('Blob conversion failed (null)');
+                alert('画像の変換に失敗しました');
+                drawPlaceholder(); // エラー時はLoading解除
+            }
+        }, 'image/jpeg', targetQuality);
+
+    } catch (e) {
+        log('Error in updatePreview: ' + e.message);
+        alert('予期せぬエラー: ' + e.message);
+        drawPlaceholder(); // エラー時はLoading解除
+    }
 };
 
 // スライダー操作イベント
